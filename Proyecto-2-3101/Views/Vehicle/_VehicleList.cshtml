@@ -1,0 +1,38 @@
+@using Proyecto_2_3101.Extensions
+@model IEnumerable<VehicleModel>
+
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>Placa</th>
+        <th>Cliente</th>
+        <th>Marca</th>
+        <th>Modelo</th>
+        <th>Tipo</th>
+        <th>Fecha Creación</th>
+        <th>Acción</th>
+    </tr>
+    </thead>
+    <tbody>
+
+    @foreach (var vehicle in Model)
+    {
+        <tr>
+            <td>@vehicle.PlateNumber</td>
+            <td>@vehicle.Client!.Fullname</td>
+            <td>@vehicle.Brand</td>
+            <td>@vehicle.Model</td>
+            <td>@Html.DisplayFor( t => vehicle.Type)</td>
+            <td>@vehicle.CreatedAt.FormatDate()</td>
+            <td>
+                @*<a href="@Url.Action("Edit", "Client", new { id = @vehicle.IdVehicle })" class="btn btn-outline-secondary">
+                    <i class="bi bi-pencil-square"></i> Editar
+                </a>*@
+
+            </td>
+        </tr>
+    }
+
+    </tbody>
+</table>
+

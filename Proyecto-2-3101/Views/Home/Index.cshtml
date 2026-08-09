@@ -1,0 +1,63 @@
+﻿@model LoginModel
+@{
+    Layout = null;
+
+    var showError = false;
+    var errorMessage = "";
+    
+    if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+    {
+        showError = true;
+        errorMessage = ViewBag.ErrorMessage;
+    }
+
+    if (TempData["sessionError"] != null)
+    {
+        showError = true;
+        errorMessage = TempData["sessionError"]?.ToString();
+    }
+}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LavaCar Brillo Total</title>
+    <link rel="icon" type="image/x-icon" href="~/favicon.ico?v=2" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="~/css/sign-in.css"/>
+</head>
+<body>
+<main class="form-signin w-100 m-auto">
+    <form method="post">
+    
+        <img class="mb-4" src="~/images/lavacar-logo.png" alt="Smart Parking Logo" style="width: 100%; height: auto"/>
+        
+        @if (showError)
+            {
+                <div class="alert alert-danger" role="alert">
+                    @errorMessage
+                </div>
+            }
+            
+        <div asp-validation-summary="All" class="alert alert-danger">
+            Preste atención a los siguientes errores:
+        </div>
+        <div class="form-floating">
+            <input type="text" asp-for="Username" class="form-control" placeholder="Usuario"/>
+            <label asp-for="Username"></label>
+        </div>
+        <div class="form-floating mb-3">
+            <input type="password" asp-for="Password" class="form-control" placeholder="Contraseña"/>
+            <label asp-for="Password"></label>
+        </div>
+        <button class="btn btn-primary w-100 py-2" type="submit">
+            Ingresar
+        </button>
+        <p class="mt-5 mb-3 text-body-secondary">&copy; 2026</p>
+    </form>
+</main>
+<script src="lib/jquery/dist/jquery.min.js"></script>
+<partial name="_ValidationScriptsPartial"></partial>
+</body>
+</html>

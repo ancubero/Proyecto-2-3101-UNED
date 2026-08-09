@@ -1,0 +1,73 @@
+@using Proyecto_2_3101.Extensions
+@model IEnumerable<ClientModel>
+
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Teléfono</th>
+        <th>Email</th>
+        <th>Fecha Creación</th>
+        <th>Acción</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var client in Model)
+    {
+        <tr>
+            <td>@client.Identifier</td>
+            <td>@client.Fullname</td>
+            <td>@client.PhoneNumber</td>
+            <td>@client.Email</td>
+            <td>@client.CreationDate.FormatDate()</td>
+            <td>
+                <a href="@Url.Action("Edit", "Client", new { id = @client.Id })" class="btn btn-outline-secondary">
+                    <i class="bi bi-pencil-square"></i> Editar
+                </a>
+                
+                <a href="#" data-id="@client.Id" class="btn btn-outline-secondary verDetalle">
+                    <i class="bi bi-eye"></i> Ver Detalle
+                </a>
+                
+                <a href="@Url.Action("Index", "Vehicle", new { clientId = @client.Id })" class="btn btn-outline-success">
+                    <i class="bi bi-car-front-fill"></i> Vehículos
+                </a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+<!-- Modal -->
+<div class="modal fade" id="detalleModal" tabindex="-1" aria-labelledby="Detalle del Cliente" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="detalleModalLabel">Detalle del Cliente</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="detalleCliente">
+                ...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $(".verDetalle").click(function (e) {
+            e.preventDefault();
+            const clientId = $(this).data("id");
+            $.ajax({
+                url: '@Url.Action("Details", "Client", new { id = "PLACEHOLDER"})'.replace("PLACEHOLDER", clientId),
+                type: "POST",
+                cache: false
+            }).done(function (result) {
+                $("#detalleCliente").html(result);
+                $("#detalleModal").modal("show");
+            });
+        });
+    });
+</script>

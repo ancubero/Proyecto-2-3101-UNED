@@ -1,0 +1,75 @@
+@model SearchClientModel
+@using Proyecto_2_3101.Models.Enums
+
+@{
+    ViewBag.Title = "Busqueda de clientes"; 
+}
+
+<h2>@ViewBag.Title</h2>
+<div class="text-end">
+    <a href="@Url.Action("Index", "Client")" class="btn btn-outline-primary"><i class="bi bi-people-fill"></i> Clientes</a>
+</div>
+<div class="row">
+    <div class="offset-md-4 col-md-4">
+        @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage) || TempData["errorMessage"] != null)
+        {
+            <div class="alert alert-danger" role="alert">
+               @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+               {
+                   @ViewBag.ErrorMessage
+               }
+               
+               @if (TempData["errorMessage"] != null)
+               {
+                   @TempData["errorMessage"]
+               }
+            </div>
+        }
+
+        @if (TempData["message"] != null)
+        {
+            <div class="alert alert-success" role="alert">
+                @TempData["message"]
+            </div>
+        }
+
+        <form method="post">
+            <div class="form-floating mb-3">
+                <input asp-for="Search" class="form-control" placeholder="Buscar" />
+                <label asp-for="Search">Buscar</label>
+            </div>
+            <div>
+                @foreach (var searchBy in Html.GetEnumSelectList<SearchClientBy>())
+                {
+                    <div class="form-check form-check-inline">
+                        <input type="radio"
+                               asp-for="SearchClientBy"
+                               class="form-check-input"  
+                               id="Type_@searchBy.Value" 
+                               value="@searchBy.Value">
+                        <label class="form-check-label" for="Type_@searchBy.Value">@searchBy.Text</label>
+                    </div>
+                }
+                <button class="btn btn-outline-success w-100 py-2" type="submit"><i class="bi bi-search"></i> Buscar</button>
+            </div>
+        </form>
+    </div>
+        @if (ViewData["Clients"] != null)
+        {
+            
+            var clients = ViewData["Clients"] as IEnumerable<ClientModel>;
+            
+            <div class="mt-5">
+                @if (clients!.Any())
+                    {
+                        <partial name="_ClientsList" model="ViewBag.Clients"/>
+                    }
+                    else
+                    {
+                        <div class="alert alert-primary text-center" role="alert">
+                            No se cuentran registros
+                            </div>
+                    }
+            </div>
+        }
+</div>

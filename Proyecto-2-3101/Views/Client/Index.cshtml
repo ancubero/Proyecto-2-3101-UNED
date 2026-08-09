@@ -1,0 +1,34 @@
+@model IEnumerable<ClientModel>
+
+@{
+    ViewBag.Title = "Lista de Clientes"; 
+}
+
+<h2>@ViewBag.Title</h2>
+<div class="text-end">
+    <a href="@Url.Action("Create", "Client")" class="btn btn-primary"><i class="bi bi-person-fill-add"></i>Crear
+        Cliente</a>
+</div>
+@if (TempData["message"] != null)
+{
+    <div id="alert" class="alert alert-success my-3 alert-dismissible fade show" role="alert">
+        @TempData["message"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+<partial name="_ClientsList" model="Model"/>
+
+@section Scripts
+{
+    @if (TempData["message"] != null)
+    {
+        <script>
+            $(document).ready(function () {
+                setTimeout(function () {
+                    bootstrap.Alert.getOrCreateInstance($('#alert')[0]).close();
+                }, 3000); // 3000 milliseconds = 3 seconds
+            });
+
+        </script>
+    }
+}

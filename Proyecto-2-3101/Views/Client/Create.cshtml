@@ -1,0 +1,23 @@
+@model ClientModel
+
+@{
+    ViewBag.Title = "Edición de Cliente"; 
+}
+
+<h2>@ViewBag.Title</h2>
+<div class="row">
+    <div class="offset-md-3 col-md-6">
+        @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+        {
+            <div class="alert alert-danger" role="alert">
+                @ViewBag.ErrorMessage
+            </div>
+        }
+        <partial name="_ClientForm" model="Model"/>
+    </div>
+</div>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial"></partial>
+}

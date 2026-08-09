@@ -1,0 +1,30 @@
+@model Proyecto_2_3101.Models.ViewModels.ClientVehicleViewModel
+
+@{
+    ViewBag.Title = "Agregar Vehiculo";
+}
+
+<h2>@ViewBag.Title</h2>
+<p>Cliente @Model.Client.Fullname</p>
+<div class="row">
+    <div class="offset-md-3 col-md-6">
+        @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+        {
+            <div class="alert alert-danger" role="alert">
+                @ViewBag.ErrorMessage
+            </div>
+        }
+
+        @if (TempData["message"] != null)
+        {
+            <div class="alert alert-success" role="alert">
+                @TempData["message"]
+            </div>
+        }
+        <partial name="_VehicleForm" model="Model.Vehicle"/>
+    </div>
+</div>
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial"></partial>
+}

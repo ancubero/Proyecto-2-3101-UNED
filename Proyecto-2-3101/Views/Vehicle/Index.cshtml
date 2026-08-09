@@ -1,0 +1,45 @@
+@using Proyecto_2_3101.Extensions
+@model Proyecto_2_3101.Models.ViewModels.ClientVehiclesViewModel
+
+@{
+    ViewBag.Title = "Vehiculos del Cliente";
+}
+<h2>@ViewBag.Title</h2>
+@if (Model.Client != null)
+{
+    <p>@Model.Client!.Fullname</p>
+}
+
+<div class="text-end mb-3">
+    <a href="@Url.Action("Create", "Vehicle")" class="btn btn-primary"><i class="bi bi-car-front-fill"></i> Agregar Vehículo</a>
+</div>
+
+@if (ViewBag.ErrorMessage != null)
+{
+    <div id="alert" class="alert alert-danger my-3 alert-dismissible fade show" role="alert">
+        @ViewBag.ErrorMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["message"] != null)
+{
+    <div id="alert" class="alert alert-success my-3 alert-dismissible fade show" role="alert">
+        @TempData["message"]    
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (Model.Vehicles != null && Model.Vehicles.Any())
+{
+    <partial name="_VehicleList" model="Model.Vehicles"/>
+}
+else
+{
+    @if (ViewBag.ErrorMessage == null)
+    {
+        <div class="alert alert-primary text-center" role="alert">
+            No se cuentran registros
+        </div>
+    }
+}

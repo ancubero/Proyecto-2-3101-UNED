@@ -1,0 +1,37 @@
+@model ClientModel?
+
+@{
+    var isEdit = Model != null && Model.Id != 0;
+}
+
+<form method="post">
+    <input type="hidden" asp-for="Id"/>
+    <div asp-validation-summary="All" class="alert alert-danger">
+        Por favor corrija los siguientes errores:
+    </div>
+    <div class="form-floating mb-3">
+        <input asp-for="Identifier" class="form-control" placeholder="Número de cédula" readonly="@(isEdit ? "readonly" : null)"/>
+        <label asp-for="Identifier">Número de cédula</label>
+    </div>
+    <div class="form-floating mb-3">
+        <input asp-for="FirstName" class="form-control" placeholder="Nombre"/>
+        <label asp-for="FirstName">Nombre</label>
+    </div>
+    <div class="form-floating mb-3">
+        <input asp-for="LastName" class="form-control" placeholder="Apellido"/>
+        <label asp-for="LastName">Apellido</label>
+    </div>
+    <div class="form-floating mb-3">
+        <input asp-for="PhoneNumber" class="form-control" placeholder="Número de télefono"/>
+        <label asp-for="PhoneNumber">Número de télefono</label>
+    </div>
+    <div class="form-floating mb-3">
+        <input asp-for="Email" class="form-control" placeholder="Correo electrónico"/>
+        <label asp-for="Email">Correo electrónico</label>
+    </div>
+    <div class="form-floating mb-3">
+        <textarea asp-for="Notes" class="form-control" placeholder="Observaciones" style="height: 100px"></textarea>
+        <label asp-for="Notes">Observaciones</label>
+    </div>
+    <button class="btn btn-primary w-100 py-2" type="submit"><i class="bi bi-floppy-fill"></i> Salvar</button>
+</form>

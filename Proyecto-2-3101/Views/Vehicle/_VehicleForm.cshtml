@@ -1,0 +1,40 @@
+@using Proyecto_2_3101.Models.Enums
+@model VehicleModel?
+
+@{
+    var isEdit = Model != null && Model!.IdVehicle != 0;
+}
+
+<form method="post">
+    <div asp-validation-summary="All" class="alert alert-danger">
+        Por favor corrija los siguientes errores:
+    </div>
+    <input type="hidden" asp-for="IdVehicle"/>
+    <div class="form-floating mb-3">
+        <input asp-for="PlateNumber" class="form-control" placeholder="Número de Placa"/>
+        <label asp-for="PlateNumber">Número de Placa</label>
+    </div>
+    <div class="form-floating mb-3">
+        <input asp-for="Brand" class="form-control" placeholder="Marca del Vehículo"/>
+        <label asp-for="Brand">Marca del Vehículo</label>
+    </div>
+    <div class="form-floating mb-3">
+        <input asp-for="@(Model!.Model)" class="form-control" placeholder="Modelo del Vehículo"/>
+        <label asp-for="@(Model!.Model)">Modelo del Vehículo</label>
+    </div>
+    <div class="form-floating mb-3">
+        <input asp-for="Color" class="form-control" placeholder="Color del Vehículo"/>
+        <label asp-for="Color">Color del Vehículo</label>
+    </div>
+    <div class="form-floating mb-3">
+        <select asp-for="@(Model!.Type)" class="form-select" >
+            <option value="" selected>Selecciones un tipo de Vehículo</option>
+            @foreach (var vType in Html.GetEnumSelectList<VehicleType>())
+            {
+                <option value="@vType.Value">@vType.Text</option>    
+            }
+        </select>
+        <label asp-for="@(Model!.Type)">Typo de Vehículo</label>
+    </div>
+    <button class="btn btn-primary w-100 py-2" type="submit"><i class="bi bi-floppy-fill"></i> Salvar</button>
+</form>

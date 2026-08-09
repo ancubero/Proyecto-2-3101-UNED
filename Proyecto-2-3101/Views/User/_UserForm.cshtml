@@ -1,0 +1,35 @@
+@model UserModel?
+
+@{
+    var isEdit = Model != null && Model.UserId != 0;
+}
+
+<form method="post">
+    <div asp-validation-summary="All" class="alert alert-danger">
+        Por favor corrija los siguientes errores:
+    </div>
+    <input type="hidden" asp-for="UserId"/>
+    <div class="form-floating mb-3">
+        <input asp-for="FullName" class="form-control" placeholder="Nombre Completo"/>
+        <label asp-for="FullName">Nombre Completo</label>
+    </div>
+    <div class="form-floating mb-3">
+        <input asp-for="Username" class="form-control" placeholder="Usuario" readonly="@(isEdit ? "readonly" : null)"/>
+        <label asp-for="Username">Usuario</label>
+    </div>
+    <div class="form-floating mb-3">
+        <input
+            type="password"
+            asp-for="Password"
+            class="form-control"
+            placeholder="Contraseña"/>
+        <label asp-for="Password">Contraseña</label>
+        @{
+            if (isEdit)
+            {
+                <div id="passwordHelp" class="form-text">Dejar en blanco si no desea actualizar el password.</div>
+            }
+        }
+    </div>
+    <button class="btn btn-primary w-100 py-2" type="submit"><i class="bi bi-floppy-fill"></i> Salvar</button>
+</form>

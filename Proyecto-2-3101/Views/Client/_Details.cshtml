@@ -1,0 +1,40 @@
+@using Proyecto_2_3101.Extensions
+@model ClientModel
+
+<div class="row bg-light p-1">
+    <div class="col-md-4">Cédula</div>
+    <div class="col-md-8">@Model.Identifier</div>
+</div>
+<div class="row p-1">
+    <div class="col-md-4">Nombre</div>
+    <div class="col-md-8">@Model.Fullname</div>
+</div>
+<div class="row p-1">
+    <div class="col-md-4">Teléfono</div>
+    <div class="col-md-8">@Model.PhoneNumber</div>
+</div>
+<div class="row p-1">
+    <div class="col-md-4">Correo Electrónico</div>
+    <div class="col-md-8">@Model.Email</div>
+</div>
+<div class="row p-1">
+    <div class="col-md-12">Observaciones</div>
+    <div class="col-md-12">@Model.Notes</div>
+</div>
+<div class="row p-1">
+    <div class="col-md-4">Cliente desde</div>
+    <div class="col-md-8">@Model.CreationDate.FormatDate() por @Model.CreatedByUser!.Username.ToUpper()</div>
+</div>
+<div class="row p-1">
+    <div class="col-md-4">Ultima modificación</div>
+    <div class="col-md-8">
+        @if(Model.ModifyDate != null)
+        {
+            @:@Model.ModifyDate.FormatDate() por @Model.ModifiedByUser!.Username.ToUpper()
+        }
+        else
+        {
+            <text>---</text>
+        }
+    </div>
+</div>
