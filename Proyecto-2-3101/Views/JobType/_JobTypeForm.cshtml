@@ -1,0 +1,39 @@
+@model JobTypeModel?
+
+@{
+    var isEdit = Model != null && Model.JobTypeId != 0;
+}
+
+<form method="post">
+    <input type="hidden" asp-for="JobTypeId"/>
+    <div asp-validation-summary="All" class="alert alert-danger">
+        Por favor corrija los siguientes errores:
+    </div>
+    <div class="form-floating mb-3">
+        <input asp-for="Name" class="form-control" placeholder="Nombre del servicio" readonly="@(isEdit ? "readonly" : null)"/>
+        <label asp-for="Name">Nombre del servicio</label>
+    </div>
+    <div class="form-floating mb-3">
+        <input 
+            asp-for="Price" 
+            class="form-control" 
+            inputmode="decimal"
+            placeholder="Precio del servicio" />
+        <label asp-for="Price">Precio del servicio</label>
+    </div>
+    <div class="form-floating mb-3">
+        <input asp-for="DurationMinutes" class="form-control" placeholder="Duración en minutos"/>
+        <label asp-for="DurationMinutes">Duración en minutos</label>
+        <div id="durationHelp" class="form-text">Duración del servicio tiempo en minutos.</div>
+    </div>
+    <div class="form-floating mb-3">
+        <textarea asp-for="Description" style="height: 200px" class="form-control" placeholder="Descripción del servicio"></textarea>
+        <label asp-for="Description">Descripción del servicio</label>
+    </div>
+    <div class="form-check form-switch mb-3">
+        <input asp-for="IsActive" class="form-check-input" type="checkbox" role="switch" >
+        <label asp-for="IsActive" class="form-check-label">Desactivar/Activar servicio</label>
+    </div>
+    
+    <button class="btn btn-primary w-100 py-2" type="submit"><i class="bi bi-floppy-fill"></i> Salvar</button>
+</form>

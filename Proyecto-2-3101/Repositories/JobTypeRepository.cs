@@ -32,6 +32,9 @@ public class JobTypeRepository(DataBaseContext context) : IJobTypeRepository
 
     public async Task<JobTypeModel?> GetByIdAsync(int id)
     {
-        return await context.JobTypes.FindAsync(id);
+        return await context.JobTypes
+            .Include(x => x.CreatedByUser)
+            .Include(x => x.UpdatedByUser)
+            .FirstOrDefaultAsync(j => j.JobTypeId == id);
     }
 }

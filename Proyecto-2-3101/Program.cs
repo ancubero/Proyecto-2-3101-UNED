@@ -5,6 +5,14 @@ using Proyecto_2_3101.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+// --- ADD THIS BLOCK TO FIX THE MULTIPLICATION BUG ---
+var defaultCulture = System.Globalization.CultureInfo.InvariantCulture;
+System.Globalization.CultureInfo.DefaultThreadCurrentCulture = defaultCulture;
+System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = defaultCulture;
+// ----------------------------------------------------
+
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 

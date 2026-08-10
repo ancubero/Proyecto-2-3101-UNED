@@ -2,6 +2,101 @@
 
 @{
     ViewBag.Title = "Servicios";
+    var crCulture = new System.Globalization.CultureInfo("es-CR");
 }
 
 <h2>@ViewBag.Title</h2>
+<div class="text-end">
+    <a href="@Url.Action("Create", "JobType")" class="btn btn-primary"><i class="bi bi-person-fill-add"></i> Crear Servicio</a>
+</div>
+@if (TempData["message"] != null)
+{
+    <div id="alert" class="alert alert-success my-3 alert-dismissible fade show" role="alert">
+        @TempData["message"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Precio</th>
+        <th>Duración</th>
+        <th>Estado</th>
+        <th>Acción</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var jobType in Model)
+    {
+        <tr>
+            <td>@jobType.JobTypeId</td>
+            <td>@jobType.Name</td>
+            <td>@jobType.Price.ToString("C", crCulture)</td>
+            <td>@jobType.DurationMinutes Minutos</td>
+            <td>
+                <span class="badge @(jobType.IsActive ? "bg-success" : "bg-danger")">
+                    @(jobType.IsActive ? "Activo" : "Inactivo")
+                </span>
+            </td>
+            <td>
+                <a href="@Url.Action("Edit", "JobType", new { id = @jobType.JobTypeId })" class="btn btn-outline-secondary">
+                    <i class="bi bi-pencil-square"></i> Editar
+                </a>
+                <a href="#" data-id="@jobType.JobTypeId" class="btn btn-outline-secondary verDetalle">
+                    <i class="bi bi-eye"></i> Ver Detalle
+                </a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+<!-- Modal -->
+<div class="modal fade" id="detalleModal" tabindex="-1" aria-labelledby="Detalle del Servicio" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="detalleModalLabel">Detalle del Servicio</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="detalleServicio">
+                ...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts
+{
+    @if (TempData["message"] != null)
+    {
+        <script>
+            $(document).ready(function () {
+                setTimeout(function () {
+                    bootstrap.Alert.getOrCreateInstance($('#alert')[0]).close();
+                }, 3000); // 3000 milliseconds = 3 seconds
+            });
+
+        </script>
+    }
+    
+    <script>
+        $(document).ready(function () {
+            $(".verDetalle").click(function (e) {
+                e.preventDefault();
+                const jobTypeId = $(this).data("id");
+                $.ajax({
+                    url: '@Url.Action("Details", "JobType", new { id = "PLACEHOLDER"})'.replace("PLACEHOLDER", jobTypeId),
+                    type: "POST",
+                    cache: false
+                }).done(function (result) {
+                    $("#detalleServicio").html(result);
+                    $("#detalleModal").modal("show");
+                });
+            });
+        });
+    </script>
+}
