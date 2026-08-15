@@ -29,6 +29,13 @@ public static class ConfigureIndexes
                 .WithMany()
                 .HasForeignKey(v => v.ClientId)
                 .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<OrderModel>()
+                .HasOne(o => o.Client)
+                .WithMany()
+                .HasForeignKey(o => o.ClientId)
+                .OnDelete(DeleteBehavior.Restrict);
+            
         }
         
         public void CreatedByForeignKeyIndexes()
@@ -50,6 +57,13 @@ public static class ConfigureIndexes
                 .WithMany()
                 .HasForeignKey(j => j.CreatedByUserId)
                 .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<OrderModel>()
+                .HasOne(o => o.CreatedByUser)
+                .WithMany()
+                .HasForeignKey(o => o.CreatedUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+            
         }
 
         public void ModifiedByForeignKeyIndexes()
@@ -70,6 +84,54 @@ public static class ConfigureIndexes
                 .HasOne(j => j.UpdatedByUser)
                 .WithMany()
                 .HasForeignKey(j => j.UpdatedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<OrderModel>()
+                .HasOne(o => o.UpdatedByUser)
+                .WithMany()
+                .HasForeignKey(o => o.UpdatedUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        }
+
+        public void OrderIndexes()
+        {
+            modelBuilder.Entity<OrderModel>()
+                .HasOne(o => o.Vehicle)
+                .WithMany()
+                .HasForeignKey(o => o.VehicleId)
+                .OnDelete(DeleteBehavior.Restrict);
+        }
+        
+        public void JobOrderIndexes()
+        {
+            modelBuilder.Entity<JobOrderModel>()
+                .HasOne(jo => jo.Order)
+                .WithMany(o => o.JobOrders)
+                .HasForeignKey(jo => jo.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+            
+            modelBuilder.Entity<JobOrderModel>()
+                .HasOne(j => j.JobType)
+                .WithMany()
+                .HasForeignKey(j => j.JobTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+        }
+
+        public void OrderLogs()
+        {
+            modelBuilder.Entity<ChangeOrderStatusLogModel>()
+                .HasOne(u => u.User)
+                .WithMany()
+                .HasForeignKey(u => u.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        }
+
+        public void PaymentsIndexes()
+        {
+            modelBuilder.Entity<PaymentModel>()
+                .HasOne(o => o.Order)
+                .WithMany()
+                .HasForeignKey(o => o.OrderId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

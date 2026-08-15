@@ -5,13 +5,11 @@ using Proyecto_2_3101.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 // --- ADD THIS BLOCK TO FIX THE MULTIPLICATION BUG ---
 var defaultCulture = System.Globalization.CultureInfo.InvariantCulture;
 System.Globalization.CultureInfo.DefaultThreadCurrentCulture = defaultCulture;
 System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = defaultCulture;
 // ----------------------------------------------------
-
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -22,11 +20,15 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 //Registra la clase EstacionamientoDbContext para hacer la conexion la base de datos
 builder.Services.AddDbContext<DataBaseContext>(options => options.UseSqlServer(connectionString));
 
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
 //Registra los repositorios
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IClientRepository, ClientRepository>();
 builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
 builder.Services.AddScoped<IJobTypeRepository, JobTypeRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IOrderStatusLogRepository, OrderStatusLogRepository>();
 
 //Registra los servicios
 builder.Services.AddScoped<ILoginService, LoginService>();
@@ -34,6 +36,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
 builder.Services.AddScoped<IJobTypeService, JobTypeService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 
 //Activa la sesión
 builder.Services.AddDistributedMemoryCache();

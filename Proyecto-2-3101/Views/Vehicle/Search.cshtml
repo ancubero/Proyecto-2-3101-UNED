@@ -4,7 +4,7 @@
 <h2>@ViewBag.Title</h2>
 <div class="row">
     <div class="offset-md-4 col-md-4">
-        <form method="post">
+        <form id="frmSearch" method="post">
             <div class="form-floating mb-3">
                 <input name="search" id="search" class="form-control" placeholder="Vehículo" />
                 <label for="search">Buscar Vehículo</label>
@@ -30,33 +30,45 @@
 {
     <script>
     $(document).ready(function () {
+        
+        $("#frmSearch").submit(function (event) {
+            event.preventDefault();
+            search();
+        })
+        
         $("#btnSearch").click(function (e) {
             e.preventDefault();
-            const plateNumber = $("#search").val();
-            $("#alertError").removeClass("show");
-            $("#alertNotFound").removeClass("show");
-            $.ajax({
-                url: '@Url.Action("Search", "Vehicle", new { plateNumber = "PLACEHOLDER"})'.replace("PLACEHOLDER", plateNumber),
-                type: "POST",
-                cache: false
-            }).done(function (result) {
-                $("#searchResult").html(result);
-            }).fail(function (xhr) {
-                let statusCode = xhr.status;
-                let statusMessage = xhr.responseText;
-                
-                if(statusCode === 400) {
-                    $("#alertError span").text(statusMessage);
-                    $("#alertError").addClass("show");
-                }
-
-                if(statusCode === 404) {
-                    $("#alertNotFound span").text(statusMessage);
-                    $("#alertNotFound").addClass("show");
-                }
-            });
+            search();
         });
     });
+    
+    
+    const search = () => {
+        const plateNumber = $("#search").val();
+        $("#alertError").removeClass("show");
+        $("#alertNotFound").removeClass("show");
+        $.ajax({
+            url: '@Url.Action("Search", "Vehicle", new { plateNumber = "PLACEHOLDER"})'.replace("PLACEHOLDER", plateNumber),
+            type: "POST",
+            cache: false
+        }).done(function (result) {
+            $("#searchResult").html(result);
+        }).fail(function (xhr) {
+            let statusCode = xhr.status;
+            let statusMessage = xhr.responseText;
+
+            if(statusCode === 400) {
+                $("#alertError span").text(statusMessage);
+                $("#alertError").addClass("show");
+            }
+
+            if(statusCode === 404) {
+                $("#alertNotFound span").text(statusMessage);
+                $("#alertNotFound").addClass("show");
+            }
+        });
+    }
+    
 </script>
 }
 

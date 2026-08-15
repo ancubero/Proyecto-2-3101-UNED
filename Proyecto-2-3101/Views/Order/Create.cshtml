@@ -1,0 +1,67 @@
+@model Proyecto_2_3101.Models.ViewModels.JobOrderViewModel
+
+@{
+    ViewBag.Title = "Crear Order";
+    var crCulture = new System.Globalization.CultureInfo("es-CR");
+}
+
+<h2>@ViewBag.Title</h2>
+<p>Orden cliente @Model.Client.Fullname con el vehículo @Model.Vehicle.Brand - @Model.Vehicle.Model</p>
+<div class="row">
+    <div class="offset-md-3 col-md-6">
+    <form method="post">
+        <input type="hidden" asp-for="Client.Id"/>
+        <input type="hidden" asp-for="Vehicle.IdVehicle"/>
+        <div asp-validation-summary="All" class="alert alert-danger">
+            Por favor corrija los siguientes errores:
+        </div>
+        <h4>Seleccione los Servicios:</h4>
+        @foreach (var job in Model.JobTypes)
+        {
+            <div class="form-check">
+                <input type="checkbox" 
+                       name="selectedJobTypeIds" 
+                       value="@job.JobTypeId" 
+                       data-price="@job.Price" 
+                       class="form-check-input service-checkbox" />
+                <label class="form-check-label">@job.Name - @job.Price.ToString("C", crCulture)</label>
+            </div>
+        }
+        <div class="card bg-light my-4 p-3" style="max-width: 300px;">
+            <h5 class="m-0">Monto Total: <span id="totalDisplay" class="text-success font-weight-bold">¢0.00</span></h5>
+        </div>
+
+        <button type="submit" class="btn btn-success px-5 py-2"><i class="bi bi-cart-check"></i> Guardar Orden</button>
+    </form>
+    </div>
+</div>
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial"></partial>
+    
+    <script>
+        $(document).ready(function () {
+            // Listen for any click/change event on the service checkboxes
+            $(".service-checkbox").on("change", function () {
+                let total = 0;
+
+                // Loop through every checkbox that is currently checked
+                $(".service-checkbox:checked").each(function () {
+                    // Extract the raw numerical value from the data-price tag
+                    let price = parseFloat($(this).data("price")) || 0;
+                    total += price;
+                });
+
+                // Format the calculated total into a beautiful Costa Rican Colón display currency layout
+                let formattedTotal = "¢" + total.toLocaleString('es-CR', { 
+                    minimumFractionDigits: 2, 
+                    maximumFractionDigits: 2 
+                });
+
+                // Inject the final string directly into the total display container node
+                $("#totalDisplay").text(formattedTotal);
+            });
+        });
+    </script>
+    
+}

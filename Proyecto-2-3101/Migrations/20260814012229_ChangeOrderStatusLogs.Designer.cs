@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Proyecto_2_3101.Data;
 
@@ -11,9 +12,11 @@ using Proyecto_2_3101.Data;
 namespace Proyecto_2_3101.Migrations
 {
     [DbContext(typeof(DataBaseContext))]
-    partial class DataBaseContextModelSnapshot : ModelSnapshot
+    [Migration("20260814012229_ChangeOrderStatusLogs")]
+    partial class ChangeOrderStatusLogs
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -43,8 +46,6 @@ namespace Proyecto_2_3101.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("ChangeOrderStatusLogs");
                 });
@@ -225,33 +226,6 @@ namespace Proyecto_2_3101.Migrations
                     b.ToTable("Orders");
                 });
 
-            modelBuilder.Entity("Proyecto_2_3101.Models.PaymentModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("AmountToPay")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("OrderId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset>("PaymentDate")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<int>("PaymentMethod")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrderId");
-
-                    b.ToTable("Payments");
-                });
-
             modelBuilder.Entity("Proyecto_2_3101.Models.UserModel", b =>
                 {
                     b.Property<int>("UserId")
@@ -354,17 +328,6 @@ namespace Proyecto_2_3101.Migrations
                     b.ToTable("Vehicles");
                 });
 
-            modelBuilder.Entity("Proyecto_2_3101.Models.ChangeOrderStatusLogModel", b =>
-                {
-                    b.HasOne("Proyecto_2_3101.Models.UserModel", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Proyecto_2_3101.Models.ClientModel", b =>
                 {
                     b.HasOne("Proyecto_2_3101.Models.UserModel", "CreatedByUser")
@@ -452,17 +415,6 @@ namespace Proyecto_2_3101.Migrations
                     b.Navigation("UpdatedByUser");
 
                     b.Navigation("Vehicle");
-                });
-
-            modelBuilder.Entity("Proyecto_2_3101.Models.PaymentModel", b =>
-                {
-                    b.HasOne("Proyecto_2_3101.Models.OrderModel", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("Proyecto_2_3101.Models.VehicleModel", b =>

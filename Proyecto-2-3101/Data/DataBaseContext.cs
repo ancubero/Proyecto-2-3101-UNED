@@ -10,7 +10,11 @@ public class DataBaseContext(DbContextOptions<DataBaseContext> options) : DbCont
     public DbSet<ClientModel> Clients { get; set; }
     public DbSet<VehicleModel> Vehicles { get; set; }
     public DbSet<JobTypeModel> JobTypes { get; set; }
+    public DbSet<OrderModel> Orders { get; set; }
+    public DbSet<JobOrderModel> JobOrders { get; set; }
+    public DbSet<PaymentModel> Payments { get; set; }
     
+    public DbSet<ChangeOrderStatusLogModel> ChangeOrderStatusLogs { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -21,6 +25,11 @@ public class DataBaseContext(DbContextOptions<DataBaseContext> options) : DbCont
         modelBuilder.CreatedByForeignKeyIndexes();
         modelBuilder.ModifiedByForeignKeyIndexes();
         modelBuilder.PricePrecision();
+        modelBuilder.CompositePrimaryKey();
+        modelBuilder.OrderIndexes();
+        modelBuilder.JobOrderIndexes();
+        modelBuilder.OrderLogs();
+        modelBuilder.PaymentsIndexes();
     }
     
     

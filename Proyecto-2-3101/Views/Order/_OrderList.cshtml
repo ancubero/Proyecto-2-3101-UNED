@@ -1,0 +1,80 @@
+@using Proyecto_2_3101.Extensions
+@using Proyecto_2_3101.Models.Enums
+@model IEnumerable<OrderModel>
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Placa</th>
+        <th>Cliente</th>
+        <th>Fecha</th>
+        <th>Estado</th>
+        <th>Total</th>
+        <th>Acción</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var order in Model)
+    {
+        <tr>
+            <td>@order.Id</td>
+            <td>@order.Vehicle!.PlateNumber</td>
+            <td>@order.Client!.Fullname</td>
+            <td>@order.CreatedAt.FormatDate()</td>
+            <td>
+                <span class="badge @order.OrderStatus.ToBadgeColor() p-2">
+                    @Html.DisplayFor(o => order.OrderStatus)
+                </span>
+            </td>
+            <td>@order.TotalPrice.FormatColones()</td>
+            <td>
+                @if (order.OrderStatus < OrderStatus.Finished)
+                {
+                    <a href="#" data-id="@order.Id" class="btn btn-outline-secondary verDetalle">
+                        <i class="bi bi-eye"></i> Ver Detalle
+                    </a>
+                }
+                @if (order.OrderStatus == OrderStatus.Finished)
+                {
+                    <a href="#" data-id="@order.Id" class="btn btn-outline-secondary verDetalle">
+                        <i class="bi bi-credit-card-2-front-fill"></i> Realizar Pago
+                    </a>
+                }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+<!-- Modal -->
+<div class="modal fade" id="detalleModal" tabindex="-1" aria-labelledby="Detalle del Servicio" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="detalleModalLabel">Detalle del Servicio</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="detalleServicio">
+                ...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $(".verDetalle").click(function (e) {
+            e.preventDefault();
+            const orderId = $(this).data("id");
+            $.ajax({
+                url: '@Url.Action("Detail", "Order", new { id = "PLACEHOLDER" })'.replace("PLACEHOLDER", orderId),
+                type: "POST",
+                cache: false
+            }).done(function (result) {
+                $("#detalleServicio").html(result);
+                $("#detalleModal").modal("show");
+            });
+        });
+    });
+</script>

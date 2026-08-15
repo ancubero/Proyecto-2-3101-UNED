@@ -85,6 +85,7 @@ public class VehicleController(IVehicleService vehicleService, IClientService cl
     [HttpPost]
     public async Task<IActionResult> Search(string plateNumber)
     {
+        
         IEnumerable<VehicleModel> vehicles = [];
 
         if (string.IsNullOrWhiteSpace(plateNumber))
@@ -97,6 +98,11 @@ public class VehicleController(IVehicleService vehicleService, IClientService cl
         {
             return NotFound($"No se encontro el vehículo con la placa {plateNumber}");
         }
+        
+        var client = await clientService.GetClientByIdAsync(vehicle.ClientId);
+
+        if (client != null) HttpContext.Session.SetClient(client);
+
         vehicles = vehicles.Append(vehicle);
         
         return PartialView("_VehicleList", vehicles);

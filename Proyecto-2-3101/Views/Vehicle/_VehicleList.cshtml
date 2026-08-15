@@ -25,10 +25,9 @@
             <td>@Html.DisplayFor( t => vehicle.Type)</td>
             <td>@vehicle.CreatedAt.FormatDate()</td>
             <td>
-                @*<a href="@Url.Action("Edit", "Client", new { id = @vehicle.IdVehicle })" class="btn btn-outline-secondary">
-                    <i class="bi bi-pencil-square"></i> Editar
-                </a>*@
-
+                <a href="@Url.Action("Create", "Order", new { vehicleId = @vehicle.IdVehicle })" class="btn btn-outline-secondary">
+                    <i class="bi bi-pencil-square"></i> Crear Orden
+                </a>
             </td>
         </tr>
     }

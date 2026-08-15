@@ -1,0 +1,43 @@
+@using Proyecto_2_3101.Extensions
+@using Proyecto_2_3101.Models.Enums
+@model OrderModel
+
+<div class="row bg-light p-1">
+    <div class="col-md-4">Cliente</div>
+    <div class="col-md-8">@Model.Client!.Fullname</div>
+</div>
+<div class="row bg-light p-1">
+    <div class="col-md-4">Placa</div>
+    <div class="col-md-8">@Model.Vehicle!.PlateNumber</div>
+</div>
+<div class="row bg-light p-1">
+    <div class="col-md-4">Marca</div>
+    <div class="col-md-8">@Model.Vehicle.Brand</div>
+</div>
+<div class="row bg-light p-1">
+    <div class="col-md-4">Modelo</div>
+    <div class="col-md-8">@Model.Vehicle.Model</div>
+</div>
+<div class="row bg-light p-1">
+    <div class="col-md-12">Servicios</div>
+    <div class="col-md-12">
+        <ul>
+            @foreach (var job in Model.JobOrders)
+            {
+                <li>@job.JobType.Name</li>
+            }
+        </ul>
+    </div>
+</div>
+<div class="row bg-light p-1">
+    <div class="col-md-4">Total</div>
+    <div class="col-md-8">@Model.TotalPrice.FormatColones()</div>
+</div>
+
+<div>
+    <form method="post" class="text-center" action="@Url.Action("NextStage", "Order")">
+        <input type="hidden" name="orderId" value="@Model.Id"/>
+        <button type="submit" class="btn @Model.OrderStatus.ToButtonColor() px-5 py-2"><i class="bi bi-arrow-right-circle-fill"></i> Realizar Pago</button>
+    </form>
+</div>
+

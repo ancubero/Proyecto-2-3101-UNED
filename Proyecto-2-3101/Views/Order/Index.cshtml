@@ -1,0 +1,105 @@
+@using Microsoft.AspNetCore.Antiforgery
+@using Proyecto_2_3101.Models.Enums
+@model IEnumerable<OrderModel>
+@inject IAntiforgery Antiforgery
+@{
+    ViewBag.Title = "Lista de Orders";
+    var tokenSet = Antiforgery.GetAndStoreTokens(Context);
+    var rawTokenValue = tokenSet.RequestToken ?? "";
+}
+
+<h2>@ViewBag.Title</h2>
+@if (TempData["message"] != null)
+{
+    <div id="alert" class="alert alert-success my-3 alert-dismissible fade show" role="alert">
+        @TempData["message"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["errorMessage"] != null)
+{
+    <div id="alert" class="alert alert-danger my-3 alert-dismissible fade show" role="alert">
+        @TempData["errorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+<div class="card p-3 bg-light my-3 shadow-sm">
+    <form id="frmSearch" method="post" action="@Url.Action("Index", "Order")" class="row align-items-end g-2">
+        <div class="offset-md-3 col-md-2">
+            <label class="form-label fw-bold small text-muted">Fecha Inicio:</label>
+            <input type="date" id="startDate" name="startDate" value="" class="form-control" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label fw-bold small text-muted">Fecha Fin:</label>
+            <input type="date" id="endDate" name="endDate" value="" class="form-control" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label fw-bold small text-muted">Estado de Orden:</label>
+            <select name="status" class="form-select">
+                <option value="">-- Todos los Estados --</option>
+                @foreach (var item in Html.GetEnumSelectList<OrderStatus>())
+                {
+                    <option value="@item.Value">@item.Text</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <div class="btn-group w-100" role="group">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Filtrar</button>
+                <a href="@Url.Action("Index", "Order")" class="btn btn-outline-secondary"><i class="bi bi-arrow-counterclockwise"></i> Limpiar</a>
+            </div>
+        </div>
+    </form>
+</div>
+<div id="alertNotFound" class="alert alert-info my-3 alert-dismissible fade" role="alert">
+    <span></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+<section id="orderList">
+    <partial name="_OrderList" model="Model" />
+</section>
+
+@section Scripts
+{
+    <script>
+        $(document).ready(function () {
+            
+            const clearAlert = () => {
+                setTimeout(function () {
+                    $('.alert').removeClass('show');
+                }, 3000); // 3000 milliseconds = 3 seconds
+            }
+
+            @if (TempData["message"] != null || TempData["errorMessage"] != null)
+            {
+                @:clearAlert();
+            }
+            
+            $("#frmSearch").on("submit", function (e) {
+                e.preventDefault();
+                const formData = $(this).serialize();
+                $.ajax({
+                    url: '@Url.Action("Search", "Order")',
+                    type: "POST",
+                    data: formData,
+                    cache: false,
+                    headers: {
+                        "RequestVerificationToken": "@rawTokenValue"
+                    }
+                }).done(function (result) {
+                    $("#orderList").html(result);
+                }).fail(function (xhr) {
+                    $("#orderList").empty();
+                    let statusCode = xhr.status;
+                    let statusMessage = xhr.responseText;
+
+                    if(statusCode === 404) {
+                        $("#alertNotFound span").text(statusMessage);
+                        $("#alertNotFound").addClass("show");
+                    }
+                    clearAlert();
+                });
+            });
+        });
+    </script>
+}
