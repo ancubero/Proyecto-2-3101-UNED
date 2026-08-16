@@ -14,4 +14,5 @@ public interface IOrderService
     Task<IEnumerable<OrderModel>> GetTodayOrdersAsync();
     Task<IEnumerable<OrderModel>> GetFilteredOrdersAsync(DateTime? startDate, DateTime? endDate, OrderStatus? status);
     Task UpdateStatusAsync(OrderModel order, int userId);
+    Task MakePaymentAsync(OrderModel order, int userId, PaymentMethods paymentMethod);
 }

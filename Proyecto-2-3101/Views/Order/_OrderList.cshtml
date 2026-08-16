@@ -36,7 +36,7 @@
                 }
                 @if (order.OrderStatus == OrderStatus.Finished)
                 {
-                    <a href="#" data-id="@order.Id" class="btn btn-outline-secondary verDetalle">
+                    <a href="#" data-id="@order.Id" class="btn btn-outline-secondary makePayment">
                         <i class="bi bi-credit-card-2-front-fill"></i> Realizar Pago
                     </a>
                 }
@@ -76,5 +76,19 @@
                 $("#detalleModal").modal("show");
             });
         });
+
+        $(".makePayment").click(function (e) {
+            e.preventDefault();
+            const orderId = $(this).data("id");
+            $.ajax({
+                url: '@Url.Action("MakePayment", "Order", new { orderId = "PLACEHOLDER" })'.replace("PLACEHOLDER", orderId),
+                type: "GET",
+                cache: false
+            }).done(function (result) {
+                $("#detalleServicio").html(result);
+                $("#detalleModal").modal("show");
+            });
+        });
+        
     });
 </script>

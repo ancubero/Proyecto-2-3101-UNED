@@ -7,11 +7,11 @@ using Proyecto_2_3101.Services;
 
 namespace Proyecto_2_3101.Controllers;
 
-public class OrderController(IJobTypeService jobTypeService, 
+public class OrderController(
+    IJobTypeService jobTypeService,
     IOrderService orderService,
     IVehicleService vehicleService) : SecureController
 {
-    
     [HttpGet]
     public async Task<IActionResult> Index()
     {
@@ -29,27 +29,26 @@ public class OrderController(IJobTypeService jobTypeService,
         {
             return NotFound("No se encontraron órdenes registradas con los filtros seleccionados.");
         }
-        
+
         return PartialView("_OrderList", orders);
     }
-    
+
 
     [HttpGet]
     [ValidateClientSession]
     public async Task<IActionResult> Create(int vehicleId)
     {
-
         var vehicle = await vehicleService.GetVehicleAsync(vehicleId);
         var jobTypes = await jobTypeService.GetAllByActiveAsync(true);
         var client = HttpContext.Session.GetClient();
-        
+
         var jobOrder = new JobOrderViewModel
         {
             JobTypes = jobTypes,
             Vehicle = vehicle!,
             Client = client!
         };
-        
+
         return View(jobOrder);
     }
 
@@ -61,7 +60,7 @@ public class OrderController(IJobTypeService jobTypeService,
         try
         {
             var client = HttpContext.Session.GetClient();
-            
+
             if (selectedJobTypeIds == null || selectedJobTypeIds.Count == 0)
             {
                 var vehicle = await vehicleService.GetVehicleAsync(model.Vehicle.IdVehicle);
@@ -71,14 +70,15 @@ public class OrderController(IJobTypeService jobTypeService,
                 model.JobTypes = jobTypes;
                 throw new Exception("Debe seleccionar al menos un tipo de servicio.");
             }
-            
+
             var user = HttpContext.Session.GetUser();
 
-            var order = await orderService.AddAsync(model.Vehicle.IdVehicle,selectedJobTypeIds, user!.UserId, client!.Id);
-            
-            TempData["message"] = $"La orden {order.Id} del cliente {client.Fullname} para el vehículo ${model.Vehicle.PlateNumber} fue procesada y guardada con éxito.";
-            return RedirectToAction("Index", "Order");
+            var order = await orderService.AddAsync(model.Vehicle.IdVehicle, selectedJobTypeIds, user!.UserId,
+                client!.Id);
 
+            TempData["message"] =
+                $"La orden {order.Id} del cliente {client.Fullname} para el vehículo ${model.Vehicle.PlateNumber} fue procesada y guardada con éxito.";
+            return RedirectToAction("Index", "Order");
         }
         catch (Exception ex)
         {
@@ -100,26 +100,61 @@ public class OrderController(IJobTypeService jobTypeService,
     [HttpPost]
     public async Task<IActionResult> NextStage(int orderId)
     {
-
         try
         {
             var order = await orderService.GetByIdAsync(orderId);
-            
-            if(order == null) throw new Exception($"No se encontraron la orden número {order}.");
+
+            if (order == null) throw new Exception($"No se encontraron la orden número {order}.");
             var user = HttpContext.Session.GetUser();
             var nextStatus = order.OrderStatus.NextStatus().GetDisplayName();
             await orderService.UpdateStatusAsync(order, user!.UserId);
             TempData["message"] = $"La orden número {orderId} ha cambiado a estado {nextStatus} correctamente.";
-
         }
         catch (Exception ex)
         {
             TempData["errorMessage"] = ex.Message;
         }
-        
+
         return RedirectToAction("Index", "Order");
     }
-    
-    
-    
+
+    [HttpGet]
+    public async Task<IActionResult> MakePayment(int orderId)
+    {
+        var order = await orderService.GetByIdAsync(orderId);
+        if (order != null) return PartialView("_MakePayment", order);
+        TempData["errorMessage"] = $"No se encontraron la orden {orderId}.";
+        return RedirectToAction("Index", "Order");
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> MakePayment(int orderId, PaymentMethods? payment)
+    {
+        if (!payment.HasValue)
+        {
+            TempData["errorMessage"] = "Error: Debe seleccionar un método de pago válido.";
+            return RedirectToAction("Index", "Order");
+        }
+
+        try
+        {
+
+            var user = HttpContext.Session.GetUser();
+
+            var order = await orderService.GetByIdAsync(orderId);
+            if (order == null) return NotFound("La orden especificada no existe.");
+
+            await orderService.MakePaymentAsync(order, user!.UserId, payment.Value);
+
+            TempData["message"] = $"Pago procesado exitosamente por medio de: {payment.Value}.";
+            return RedirectToAction("Index");
+
+        }
+        catch (Exception ex)
+        {
+            TempData["errorMessage"] = $"Ocurrió un error inesperado al procesar el pago: {ex.Message}";
+            return RedirectToAction("Index", "Order");
+        }
+        
+    }
 }

@@ -6,12 +6,12 @@ namespace Proyecto_2_3101.Models;
 
 public class PaymentModel
 {
-    public int Id { get; set; }
+    public int Id { get; init; }
     public required decimal AmountToPay { get; set; }
     public PaymentMethods PaymentMethod { get; set; }
     public DateTimeOffset PaymentDate { get; set; }
     public int OrderId { get; set; }
     
     [ForeignKey(nameof(OrderId))]
-    public OrderModel? Order { get; set; }
+    public OrderModel? Order { get; init; }
 }

@@ -6,10 +6,11 @@ using Proyecto_2_3101.Repositories;
 
 namespace Proyecto_2_3101.Services;
 
-public class OrderService(IOrderRepository orderRepository, 
+public class OrderService (IOrderRepository orderRepository, 
     IJobTypeRepository jobTypeRepository, 
     IUnitOfWork unitOfWork,
-    IOrderStatusLogRepository orderStatusLogRepository) : IOrderService
+    IOrderStatusLogRepository orderStatusLogRepository,
+    IPaymentRepository paymentRepository) : IOrderService
 {
     public async Task<OrderModel> AddAsync(int vehicleid, List<int> selectedJobTypeIds, int userId, int clientId)
     {
@@ -109,6 +110,45 @@ public class OrderService(IOrderRepository orderRepository,
         {
             await unitOfWork.RollbackTransactionAsync();
             throw new Exception($"Error cambiando la orden de estado: {e.Message}");
+        }
+    }
+
+    public async Task MakePaymentAsync(OrderModel order, int userId, PaymentMethods paymentMethod)
+    {
+        await unitOfWork.BeginTransactionAsync();
+        try
+        {
+
+            var payment = new PaymentModel
+            {
+                AmountToPay = order.TotalPrice,
+                OrderId = order.Id,
+                PaymentMethod = paymentMethod,
+                PaymentDate = DateTimeOffset.Now
+            };
+            
+            var orderLog = new ChangeOrderStatusLogModel
+            {
+                OrderId = order.Id,
+                OrderStatus = order.OrderStatus.NextStatus(),
+                RegisterDate = DateTimeOffset.Now,
+                UserId = userId
+            };
+            
+            order.OrderStatus = order.OrderStatus.NextStatus();
+            order.UpdatedUserId = userId;
+            order.UpdatedAt = DateTimeOffset.Now;
+            orderRepository.PrepareUpdate(order);
+            orderStatusLogRepository.Add(orderLog);
+            paymentRepository.AddPayment(payment);
+            await unitOfWork.SaveChangesAsync();
+            await unitOfWork.CommitTransactionAsync();
+            
+        }
+        catch (Exception e)
+        {
+            await unitOfWork.RollbackTransactionAsync();
+            throw new Exception($"Error registrando el pago de la orden {order.Id}: {e.Message}");
         }
     }
 }

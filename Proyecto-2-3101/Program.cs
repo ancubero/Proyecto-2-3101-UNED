@@ -29,6 +29,7 @@ builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
 builder.Services.AddScoped<IJobTypeRepository, JobTypeRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderStatusLogRepository, OrderStatusLogRepository>();
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 
 //Registra los servicios
 builder.Services.AddScoped<ILoginService, LoginService>();
