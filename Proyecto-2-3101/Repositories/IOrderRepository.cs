@@ -1,5 +1,6 @@
 using Proyecto_2_3101.Models;
 using Proyecto_2_3101.Models.Enums;
+using Proyecto_2_3101.Models.ViewModels;
 
 namespace Proyecto_2_3101.Repositories;
 
@@ -14,5 +15,6 @@ public interface IOrderRepository
     Task<IEnumerable<OrderModel>> GetByClientIdAsync(int clientId);
     Task<IEnumerable<OrderModel>> GetTodayOrdersAsync();
     Task<IEnumerable<OrderModel>> GetFilteredOrdersAsync(DateTime? startDate, DateTime? endDate, OrderStatus? status);
+    Task<OrderStatusReportViewModel> GetOrderByStatusAsync();
     
 }

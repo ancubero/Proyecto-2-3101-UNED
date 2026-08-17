@@ -2,19 +2,20 @@ using Proyecto_2_3101.Data;
 using Proyecto_2_3101.Extensions;
 using Proyecto_2_3101.Models;
 using Proyecto_2_3101.Models.Enums;
+using Proyecto_2_3101.Models.ViewModels;
 using Proyecto_2_3101.Repositories;
 
 namespace Proyecto_2_3101.Services;
 
-public class OrderService (IOrderRepository orderRepository, 
-    IJobTypeRepository jobTypeRepository, 
+public class OrderService(
+    IOrderRepository orderRepository,
+    IJobTypeRepository jobTypeRepository,
     IUnitOfWork unitOfWork,
     IOrderStatusLogRepository orderStatusLogRepository,
     IPaymentRepository paymentRepository) : IOrderService
 {
     public async Task<OrderModel> AddAsync(int vehicleid, List<int> selectedJobTypeIds, int userId, int clientId)
     {
-
         var order = new OrderModel
         {
             ClientId = clientId,
@@ -29,24 +30,24 @@ public class OrderService (IOrderRepository orderRepository,
         {
             var jobItem = await jobTypeRepository.GetByIdAsync(jobTypeId);
 
-            if (jobItem == null) throw  new Exception($"El servicio Id {jobTypeId} no ha sido encontrado");
-            
+            if (jobItem == null) throw new Exception($"El servicio Id {jobTypeId} no ha sido encontrado");
+
             var detailRow = new JobOrderModel
             {
                 JobTypeId = jobItem.JobTypeId,
                 Price = jobItem.Price
             };
-                
+
             order.JobOrders.Add(detailRow);
             order.TotalPrice += jobItem.Price;
         }
-        
+
         return await orderRepository.AddAsync(order);
     }
 
     public async Task UpdateAsync(OrderModel order, int userId)
     {
-        order.UpdatedUserId =  userId;
+        order.UpdatedUserId = userId;
         order.UpdatedAt = DateTimeOffset.Now;
         await orderRepository.UpdateAsync(order);
     }
@@ -76,20 +77,19 @@ public class OrderService (IOrderRepository orderRepository,
         return await orderRepository.GetTodayOrdersAsync();
     }
 
-    public async Task<IEnumerable<OrderModel>> GetFilteredOrdersAsync(DateTime? startDate, DateTime? endDate, OrderStatus? status)
+    public async Task<IEnumerable<OrderModel>> GetFilteredOrdersAsync(DateTime? startDate, DateTime? endDate,
+        OrderStatus? status)
     {
         return await orderRepository.GetFilteredOrdersAsync(startDate, endDate, status);
     }
 
-    
+
     public async Task UpdateStatusAsync(OrderModel order, int userId)
     {
-
         await unitOfWork.BeginTransactionAsync();
-        
+
         try
         {
-
             var orderLog = new ChangeOrderStatusLogModel
             {
                 OrderId = order.Id,
@@ -105,8 +105,8 @@ public class OrderService (IOrderRepository orderRepository,
             orderStatusLogRepository.Add(orderLog);
             await unitOfWork.SaveChangesAsync();
             await unitOfWork.CommitTransactionAsync();
-
-        } catch(Exception e)
+        }
+        catch (Exception e)
         {
             await unitOfWork.RollbackTransactionAsync();
             throw new Exception($"Error cambiando la orden de estado: {e.Message}");
@@ -118,7 +118,6 @@ public class OrderService (IOrderRepository orderRepository,
         await unitOfWork.BeginTransactionAsync();
         try
         {
-
             var payment = new PaymentModel
             {
                 AmountToPay = order.TotalPrice,
@@ -126,7 +125,7 @@ public class OrderService (IOrderRepository orderRepository,
                 PaymentMethod = paymentMethod,
                 PaymentDate = DateTimeOffset.Now
             };
-            
+
             var orderLog = new ChangeOrderStatusLogModel
             {
                 OrderId = order.Id,
@@ -134,7 +133,7 @@ public class OrderService (IOrderRepository orderRepository,
                 RegisterDate = DateTimeOffset.Now,
                 UserId = userId
             };
-            
+
             order.OrderStatus = order.OrderStatus.NextStatus();
             order.UpdatedUserId = userId;
             order.UpdatedAt = DateTimeOffset.Now;
@@ -143,12 +142,38 @@ public class OrderService (IOrderRepository orderRepository,
             paymentRepository.AddPayment(payment);
             await unitOfWork.SaveChangesAsync();
             await unitOfWork.CommitTransactionAsync();
-            
         }
         catch (Exception e)
         {
             await unitOfWork.RollbackTransactionAsync();
             throw new Exception($"Error registrando el pago de la orden {order.Id}: {e.Message}");
         }
+    }
+
+    public Task<OrderStatusReportViewModel> GetOrderByStatusAsync()
+    {
+        return orderRepository.GetOrderByStatusAsync();
+    }
+
+    public async Task<OperationsDashboardViewModel> GetDailyOperationsDashboardAsync()
+    {
+        // 1. Fetch today's records stream from your repository
+        var todayOrders = await orderRepository.GetTodayOrdersAsync();
+        var materializedList = todayOrders.ToList();
+
+        // 2. Count and sum statuses instantly straight out of web server RAM memory
+        var dashboard = new OperationsDashboardViewModel
+        {
+            TodayOrdersList = materializedList,
+            PendingCount = materializedList.Count(o => o.OrderStatus == OrderStatus.Pending),
+            ProcessingCount =
+                materializedList.Count(o => o.OrderStatus == OrderStatus.Processing),
+            CompletedCount = materializedList.Count(o =>
+                o.OrderStatus == OrderStatus.Completed || o.OrderStatus == OrderStatus.Paid),
+            TotalRevenueToday = materializedList.Where(o => o.OrderStatus != OrderStatus.Pending)
+                .Sum(o => o.TotalPrice)
+        };
+
+        return dashboard;
     }
 }

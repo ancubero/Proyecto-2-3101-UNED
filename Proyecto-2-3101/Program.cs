@@ -11,6 +11,13 @@ System.Globalization.CultureInfo.DefaultThreadCurrentCulture = defaultCulture;
 System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = defaultCulture;
 // ----------------------------------------------------
 
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.PropertyNamingPolicy = null; // Keeps original C# naming intact
+    });
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
@@ -30,6 +37,7 @@ builder.Services.AddScoped<IJobTypeRepository, JobTypeRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderStatusLogRepository, OrderStatusLogRepository>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddScoped<IJobOrdersRepository, JobOrdersRepository>();
 
 //Registra los servicios
 builder.Services.AddScoped<ILoginService, LoginService>();
@@ -38,6 +46,8 @@ builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
 builder.Services.AddScoped<IJobTypeService, JobTypeService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IJobOrdersService, JobOrdersService>();
 
 //Activa la sesión
 builder.Services.AddDistributedMemoryCache();

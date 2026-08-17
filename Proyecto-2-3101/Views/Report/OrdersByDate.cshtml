@@ -1,0 +1,161 @@
+@using Proyecto_2_3101.Extensions
+@model Proyecto_2_3101.Models.ViewModels.RevenueReportViewModel
+@{
+    ViewBag.Title = "Cierre de Caja y Recaudación Diaria";
+    
+    string startDateValue = ViewBag.StartDate != null ? ((DateTime)ViewBag.StartDate).ToString("yyyy-MM-dd") : "";
+    string endDateValue = ViewBag.EndDate != null ? ((DateTime)ViewBag.EndDate).ToString("yyyy-MM-dd") : "";
+}
+
+<h2><i class="bi bi-shield-check text-success"></i> @ViewBag.Title</h2>
+
+<!-- --- DATE FILTER BAR PANEL --- -->
+<div class="card p-3 bg-light my-3 shadow-sm border-0">
+    <form method="get" action="@Url.Action("RevenueReport", "Report")" class="row align-items-end g-2">
+        <div class="col-md-4">
+            <label class="form-label fw-bold small text-muted">Fecha Inicio:</label>
+            <input type="date" name="startDate" value="@startDateValue" class="form-control" />
+        </div>
+        <div class="col-md-4">
+            <label class="form-label fw-bold small text-muted">Fecha Fin:</label>
+            <input type="date" name="endDate" value="@endDateValue" class="form-control" />
+        </div>
+        <div class="col-md-4">
+            <div class="btn-group w-100" role="group">
+                <button type="submit" class="btn btn-success"><i class="bi bi-graph-up"></i> Generar Reporte</button>
+                <a href="@Url.Action("RevenueReport", "Report")" class="btn btn-outline-secondary"><i class="bi bi-arrow-counterclockwise"></i> Limpiar</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- --- 1. DAILY TOTALS SUMMARY GRID TABLE --- -->
+<div class="card shadow-sm mb-4 border-0">
+    <div class="card-header bg-dark text-white fw-bold py-3">
+        <i class="bi bi-calendar-check-fill"></i> Resumen Consolidado de Cierres Diarios
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover table-striped align-middle m-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-4">Fecha de Operación</th>
+                    <th class="text-center">Cantidad de Pagos (Count)</th>
+                    <th class="text-end pe-4">Monto Recaudado (Sum)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.DailyRevenueTotals == null || !Model.DailyRevenueTotals.Any())
+                {
+                    <tr>
+                        <td colspan="3" class="text-center py-4 text-muted">
+                            <i class="bi bi-info-circle-fill text-warning"></i> No se encontraron registros de caja para el rango seleccionado.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var daily in Model.DailyRevenueTotals)
+                    {
+                        <tr>
+                            <td class="ps-4 fw-semibold">
+                                <i class="bi bi-calendar3 text-muted me-2"></i> @daily.CalendarDate.ToString("dd/MM/yyyy")
+                            </td>
+                            <td class="text-center fs-5 text-dark fw-bold">@daily.TotalTransactions</td>
+                            <td class="text-end pe-4 text-success fw-bold fs-5">@daily.TotalAmount.FormatColones()</td>
+                        </tr>
+                    }
+                    <!-- TABLE MASTER FOOTER TOTALS -->
+                    <tr class="table-dark text-white fw-bold">
+                        <td class="ps-4">TOTAL CONSOLIDADO:</td>
+                        <td class="text-center fs-4">@Model.DailyRevenueTotals.Sum(x => x.TotalTransactions)</td>
+                        <td class="text-end pe-4 text-warning fs-4">@Model.TotalRevenueCollected.FormatColones()</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- --- 2. GRAPHIC TREND LINE DISPLAY (Under the Table) --- -->
+<div class="card shadow-sm mb-4 border-0">
+    <div class="card-header bg-dark text-white fw-bold py-3">
+        <i class="bi bi-graph-up-arrow"></i> Tendencia de Ingresos Diarios (Visualización)
+    </div>
+    <div class="card-body">
+        <div style="position: relative; height:280px; width:100%;">
+            @if (Model.DailyRevenueTotals != null && Model.DailyRevenueTotals.Any())
+            {
+                <canvas id="revenueTrendChart" style="display: block; width: 100%; height: 100%;"></canvas>
+            }
+            else
+            {
+                <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted">
+                    <i class="bi bi-image-alt fs-2 mb-2"></i>
+                    <span>Gráfico no disponible sin datos de transacciones.</span>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- --- CHART INFRASTRUCTURE CORE ASSETS --- -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    window.addEventListener('DOMContentLoaded', function () {
+        try {
+            const ctxElement = document.getElementById('revenueTrendChart');
+            if (!ctxElement) return; // Halt safely if no graphics canvas is rendered
+
+            const trendLabels = [];
+            const revenueAmounts = [];
+
+            // Populating JavaScript data arrays directly from the C# compilation engine loop
+            @foreach (var daily in Model.DailyRevenueTotals!)
+            {
+                <text>
+                    trendLabels.push("@daily.CalendarDate.ToString("dd/MM/yyyy")");
+                    revenueAmounts.push(@daily.TotalAmount);
+                </text>
+            }
+
+            const ctx = ctxElement.getContext('2d');
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: trendLabels,
+                    datasets: [{
+                        label: 'Ingresos por Fecha (¢)',
+                        data: revenueAmounts,
+                        borderColor: 'rgb(25, 135, 84)',
+                        backgroundColor: 'rgba(25, 135, 84, 0.08)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.22, // Soft interpolation curves
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        pointBackgroundColor: 'rgb(25, 135, 84)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(val) {
+                                    return '¢' + val.toLocaleString('es-CR');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            console.log("Dashboard Chart components loaded seamlessly.");
+        } catch (error) {
+            console.error("Dashboard Engine Exception:", error);
+        }
+    });
+</script>

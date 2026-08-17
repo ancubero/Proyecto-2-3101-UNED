@@ -41,12 +41,11 @@
         </span>
     </div>
 </div>
-@if (Model.OrderStatus < OrderStatus.Finished)
-{
-    <div class="mt-3">
-        <form method="post" class="text-center" action="@Url.Action("NextStage", "Order")">
-            <input type="hidden" name="orderId" value="@Model.Id"/>
-            <button type="submit" class="btn @Model.OrderStatus.NextStatus().ToButtonColor() px-5 py-2"><i class="bi bi-arrow-right-circle-fill"></i> Cambiar a @Model.OrderStatus.NextStatus().GetDisplayName()</button>
-        </form>
-    </div>
-}
+<div class="mt-3">
+    <form method="post" class="text-center" action="@Url.Action("NextStage", "Order")">
+        <input type="hidden" name="orderId" value="@Model.Id"/>
+        <button type="submit" class="btn @Model.OrderStatus.NextStatus().ToButtonColor() px-5 py-2"><i
+                class="bi bi-arrow-right-circle-fill"></i> Cambiar a @Model.OrderStatus.NextStatus().GetDisplayName()
+        </button>
+    </form>
+</div>

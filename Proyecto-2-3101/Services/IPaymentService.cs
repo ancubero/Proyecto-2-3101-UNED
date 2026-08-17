@@ -1,12 +1,11 @@
 using Proyecto_2_3101.Models;
 using Proyecto_2_3101.Models.Enums;
+using Proyecto_2_3101.Models.ViewModels;
 
-namespace Proyecto_2_3101.Repositories;
+namespace Proyecto_2_3101.Services;
 
-public interface IPaymentRepository
+public interface IPaymentService
 {
-    void AddPayment(PaymentModel payment);
-    
     Task<IEnumerable<PaymentModel>> GetPaymentsByDateByTypeAsync(DateTime? startDate, DateTime? endDate, PaymentMethods? paymentMethod);
-
+    Task<RevenueReportViewModel> GetRevenueReportAsync(DateTime? startDate, DateTime? endDate);
 }

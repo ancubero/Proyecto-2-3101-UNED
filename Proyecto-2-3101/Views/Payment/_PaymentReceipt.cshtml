@@ -1,0 +1,32 @@
+@using Proyecto_2_3101.Extensions
+@model Proyecto_2_3101.Models.ViewModels.PaymentReceiptViewModel
+
+<div class="alert alert-success text-center my-3">
+    <i class="bi bi-check-circle-fill fs-2 d-block mb-2"></i>
+    <h4>¡Pago Procesado Exitosamente!</h4>
+</div>
+
+<div class="card p-3 shadow-sm mb-3">
+    <h5 class="card-title border-bottom pb-2">Comprobante de Caja</h5>
+    <div class="row py-1">
+        <div class="col-6 text-muted">Referencia:</div>
+        <div class="col-6 fw-bold text-end">@Model.TransactionReference</div>
+    </div>
+    <div class="row py-1">
+        <div class="col-6 text-muted">Cliente:</div>
+        <div class="col-6 text-end">@Model.ClientName</div>
+    </div>
+    <div class="row py-1">
+        <div class="col-6 text-muted">Vehículo:</div>
+        <div class="col-6 text-end">@Model.PlateNumber</div>
+    </div>
+    <div class="row py-1">
+        <div class="col-6 text-muted">Método:</div>
+        <div class="col-6 text-end">@Html.DisplayFor(p => Model.PaymentMethodName)</div>
+    </div>
+    <hr />
+    <div class="row py-1 fs-5">
+        <div class="col-6 fw-bold">Monto Total:</div>
+        <div class="col-6 fw-bold text-success text-end">@Model.AmountPaid.FormatColones()</div>
+    </div>
+</div>

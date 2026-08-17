@@ -1,0 +1,207 @@
+@using Proyecto_2_3101.Extensions
+@model Proyecto_2_3101.Models.ViewModels.OrderStatusReportViewModel
+
+@{
+    ViewBag.Title = "Reporte de Órdenes por Estado";
+}
+
+<div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-4">
+    <h2><i class="bi bi-graph-up-arrow text-primary"></i> @ViewBag.Title</h2>
+    <span class="text-muted fw-bold">Corte de Caja: @DateTime.Now.ToString("dd/MM/yyyy hh:mm tt")</span>
+</div>
+
+<!-- --- TOP LEVEL KPI SUMMARY CARDS --- -->
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card bg-primary text-white h-100 shadow-sm border-0">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="text-uppercase text-white-50 small m-0 fw-bold">Volumen Total de Órdenes</h6>
+                    <h2 class="display-5 fw-bold my-1">@Model.TotalOrdersCount</h2>
+                    <small class="text-white-50">Transacciones registradas en el sistema</small>
+                </div>
+                <i class="bi bi-list-check fs-1 text-white-50"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card bg-success text-white h-100 shadow-sm border-0">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="text-uppercase text-white-50 small m-0 fw-bold">Facturación Bruta Acumulada</h6>
+                    <h2 class="display-5 fw-bold my-1">@Model.GrandTotalPrice.FormatColones()</h2>
+                    <small class="text-white-50">Suma total de montos cobrados y pendientes</small>
+                </div>
+                <i class="bi bi-cash-coin fs-1 text-white-50"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- --- DETAILED BREAKDOWN DATA GRID TABLE --- -->
+<div class="card shadow-sm">
+    <div class="card-header bg-dark text-white fw-bold py-3">
+        <i class="bi bi-table"></i> Desglose Detallado por Estado Operacional
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover table-striped align-middle m-0">
+            <thead class="table-light">
+            <tr>
+                <th class="ps-4">Estado Operacional</th>
+                <th class="text-center">Cantidad de Órdenes</th>
+                <th class="text-center">Porcentaje del Total</th>
+                <th class="text-end pe-4">Ingresos Totales</th>
+            </tr>
+            </thead>
+            <tbody>
+            @if (!Model.StatusBreakdown.Any())
+            {
+                <tr>
+                    <td colspan="4" class="text-center py-4 text-muted">
+                        <i class="bi bi-info-circle"></i> No hay datos de órdenes disponibles para generar el desglose.
+                    </td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var item in Model.StatusBreakdown)
+                {
+                    // Calculate live distribution percentages safely
+                    double percentage = Model.TotalOrdersCount > 0 
+                        ? ((double)item.Count / Model.TotalOrdersCount) * 100 
+                        : 0;
+
+                    <tr>
+                        <td class="ps-4">
+                            <span class="badge @item.Status.ToBadgeColor() px-3 py-2 fs-6 shadow-sm">
+                                @Html.DisplayFor(m => item.Status)
+                            </span>
+                        </td>
+                        <td class="text-center fw-bold fs-5">@item.Count</td>
+                        <td class="text-center">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <span class="me-2 fw-semibold">@percentage.ToString("F1")%</span>
+                                <div class="progress w-50" style="height: 6px;">
+                                    <div class="progress-bar bg-info" style="width: @percentage%"></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-end pe-4 fw-bold text-dark fs-5">@item.TotalRevenue.FormatColones()</td>
+                    </tr>
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- --- GRAPHIC BAR CHART CONTAINER CARD --- -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-dark text-white fw-bold py-3">
+        <i class="bi bi-bar-chart-line-fill"></i> Distribución Visual de Órdenes por Estado
+    </div>
+    <div class="card-body">
+        <div style="position: relative; height:320px; width:100%;">
+            <!-- Explicit styles force canvas to render dimension footprints instantly -->
+            <canvas id="statusBarChart" style="display: block; width: 100%; height: 100%;"></canvas>
+        </div>
+    </div>
+</div>
+<div class="text-end mt-4">
+    <button type="button" class="btn btn-outline-secondary btn-lg" onclick="window.print();">
+        <i class="bi bi-printer-fill"></i> Imprimir Reporte de Gerencia
+    </button>
+</div>
+@section Scripts
+{
+    <!-- 1. PLACING CDN INFRASTRUCTURE HIGHER GUARANTEES SAFE SCRIPT LOOKUPS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- 2. PLAIN SCRIPT INLINE REGISTRATION EXECUTES RELIABLY EVERY TIME -->
+<script>
+    // Using native vanilla event loops triggers chart paints the exact millisecond content lands
+    window.addEventListener('DOMContentLoaded', function () {
+        try {
+            const labels = [];
+            const dataCounts = [];
+            const backgroundColors = [];
+            const borderColors = [];
+
+            // Color dictionary mapped directly onto your system's design constraints
+            const colorMap = {
+                "Pending": { bg: 'rgba(255, 193, 7, 0.75)', border: 'rgb(255, 193, 7)' },
+                "InProgress": { bg: 'rgba(13, 110, 253, 0.75)', border: 'rgb(13, 110, 253)' },
+                "Finished": { bg: 'rgba(25, 135, 84, 0.75)', border: 'rgb(25, 135, 84)' },
+                "Cancelled": { bg: 'rgba(220, 53, 69, 0.75)', border: 'rgb(220, 53, 69)' }
+            };
+
+            // Loop through your C# data rows to populate arrays safely
+            @foreach (var item in Model.StatusBreakdown)
+            {
+                var cleanStatusName = item.Status.ToString();
+                var userFriendlyLabel = cleanStatusName;
+                
+                if (cleanStatusName == "Pending") userFriendlyLabel = "Pendiente";
+                if (cleanStatusName == "InProgress") userFriendlyLabel = "En Progreso";
+                if (cleanStatusName == "Finished") userFriendlyLabel = "Completado";
+                if (cleanStatusName == "Cancelled") userFriendlyLabel = "Cancelado";
+
+                // Safe text serialization
+                @:labels.push("@Html.Raw(userFriendlyLabel)");
+                @:dataCounts.push(@item.Count);
+                @:if (colorMap["@cleanStatusName"]) {
+                @:    backgroundColors.push(colorMap["@cleanStatusName"].bg);
+                @:    borderColors.push(colorMap["@cleanStatusName"].border);
+                @:} else {
+                @:    backgroundColors.push('rgba(108, 117, 125, 0.75)');
+                @:    borderColors.push('rgb(108, 117, 125)');
+                @:}
+            }
+
+            // 3. Target the canvas node explicitly
+            const canvasElement = document.getElementById('statusBarChart');
+            if (!canvasElement) {
+                console.error("Critical Error: Canvas node element 'statusBarChart' was not found in the DOM.");
+                return;
+            }
+
+            const ctx = canvasElement.getContext('2d');
+            
+            // 4. Paint the graphic data tree
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Cantidad de Órdenes',
+                        data: dataCounts,
+                        backgroundColor: backgroundColors,
+                        borderColor: borderColors,
+                        borderWidth: 2,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0,
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+            
+            console.log("Chart.js successfully initialized and rendered.");
+        } catch (error) {
+            console.error("Chart rendering runtime exception caught:", error);
+        }
+    });
+</script>
+}

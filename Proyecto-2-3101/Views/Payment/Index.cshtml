@@ -1,0 +1,79 @@
+@using Proyecto_2_3101.Extensions
+@using Proyecto_2_3101.Models.Enums
+@model IEnumerable<PaymentModel>
+@{
+    ViewBag.Title = "Historial de Pagos";
+    
+    // Capture state to preserve selections in input elements after filtering
+    var startDateValue = ViewBag.StartDate != null ? ((DateTime)ViewBag.StartDate).ToString("yyyy-MM-dd") : "";
+    var endDateValue = ViewBag.EndDate != null ? ((DateTime)ViewBag.EndDate).ToString("yyyy-MM-dd") : "";
+    int? currentMethodFilter = ViewBag.CurrentMethod != null ? (int)ViewBag.CurrentMethod : null;
+}
+
+<h2>@ViewBag.Title</h2>
+
+<!-- --- MULTI-FILTER SEARCH PANEL --- -->
+<div class="card p-3 bg-light my-3 shadow-sm">
+    <form method="post" action="@Url.Action("Index", "Payment")" class="row align-items-end g-2">
+        <div class="col-md-3">
+            <label class="form-label fw-bold small text-muted">Fecha Inicio:</label>
+            <input type="date" name="startDate" value="@startDateValue" class="form-control" />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label fw-bold small text-muted">Fecha Fin:</label>
+            <input type="date" name="endDate" value="@endDateValue" class="form-control" />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label fw-bold small text-muted">Método de Pago:</label>
+            <select name="paymentMethod" class="form-select">
+                <option value="">-- Todos los Métodos --</option>
+                @foreach (var item in Html.GetEnumSelectList<PaymentMethods>())
+                {
+                    if (currentMethodFilter.HasValue && item.Value == currentMethodFilter.Value.ToString())
+                    {
+                        <option value="@item.Value" selected>@item.Text</option>
+                    }
+                    else
+                    {
+                        <option value="@item.Value">@item.Text</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <div class="btn-group w-100" role="group">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Filtrar</button>
+                <a href="@Url.Action("Index", "Payment")" class="btn btn-outline-secondary"><i class="bi bi-arrow-counterclockwise"></i> Limpiar</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- --- PAYMENT DATA GRID TABLE --- -->
+<table class="table table-hover table-striped">
+    <thead>
+        <tr>
+            <th>Pago ID</th>
+            <th>Orden #</th>
+            <th>Cliente</th>
+            <th>Vehículo (Placa)</th>
+            <th>Método</th>
+            <th>Fecha</th>
+            <th>Monto</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var payment in Model)
+        {
+            <tr>
+                <td>@payment.Id</td>
+                <td>@payment.OrderId</td>
+                <td>@payment.Order?.Client?.Fullname</td>
+                <td>@payment.Order?.Vehicle?.Brand (@payment.Order?.Vehicle?.PlateNumber)</td>
+                <td>@Html.DisplayFor(m => payment.PaymentMethod)</td>
+                <td>@payment.PaymentDate.FormatDate()</td>
+                <td class="text-success fw-bold">@payment.AmountToPay.FormatColones()</td>
+            </tr>
+        }
+    </tbody>
+</table>

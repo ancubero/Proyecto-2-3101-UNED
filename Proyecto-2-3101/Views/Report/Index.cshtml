@@ -1,0 +1,9 @@
+@{
+    ViewBag.Title = "Reportes";
+}
+
+<h2>@ViewBag.Title</h2>
+
+<a href="@Url.Action("OrdersByStatus", "Report")">Status</a>
+<a href="@Url.Action("OrdersByDate", "Report")">Resumen por dia</a>
+<a href="@Url.Action("JobPerformanceSummary", "Report")">Servicios solicitados</a>

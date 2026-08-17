@@ -7,7 +7,7 @@ using Proyecto_2_3101.Services;
 
 namespace Proyecto_2_3101.Controllers;
 
-public class HomeController(ILoginService loginService) : Controller
+public class HomeController(ILoginService loginService, IOrderService orderService) : Controller
 {
     [HttpGet]
     public IActionResult Index() => View();
@@ -36,10 +36,12 @@ public class HomeController(ILoginService loginService) : Controller
 
 
     [ValidateSession]
-    public IActionResult Dashboard()
+    public async Task<IActionResult> Dashboard()
     {
-        ViewData["Title"] = "Dashboard";
-        return View();
+
+        var dashboardData = await orderService.GetDailyOperationsDashboardAsync();
+        
+        return View(dashboardData);
     }
 
     public IActionResult Logout()

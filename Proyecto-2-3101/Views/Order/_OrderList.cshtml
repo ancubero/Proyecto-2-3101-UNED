@@ -28,7 +28,7 @@
             </td>
             <td>@order.TotalPrice.FormatColones()</td>
             <td>
-                @if (order.OrderStatus < OrderStatus.Finished)
+                @if (order.OrderStatus is < OrderStatus.Finished or OrderStatus.Paid)
                 {
                     <a href="#" data-id="@order.Id" class="btn btn-outline-secondary verDetalle">
                         <i class="bi bi-eye"></i> Ver Detalle
@@ -39,6 +39,10 @@
                     <a href="#" data-id="@order.Id" class="btn btn-outline-secondary makePayment">
                         <i class="bi bi-credit-card-2-front-fill"></i> Realizar Pago
                     </a>
+                }
+                @if (order.OrderStatus == OrderStatus.Completed)
+                {
+                    <span class="btn btn-success"><i class="bi bi-check-all"></i> Entregado</span>
                 }
             </td>
         </tr>
@@ -81,7 +85,7 @@
             e.preventDefault();
             const orderId = $(this).data("id");
             $.ajax({
-                url: '@Url.Action("MakePayment", "Order", new { orderId = "PLACEHOLDER" })'.replace("PLACEHOLDER", orderId),
+                url: '@Url.Action("MakePayment", "Payment", new { orderId = "PLACEHOLDER" })'.replace("PLACEHOLDER", orderId),
                 type: "GET",
                 cache: false
             }).done(function (result) {

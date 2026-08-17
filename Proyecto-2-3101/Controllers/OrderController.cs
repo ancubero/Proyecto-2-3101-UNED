@@ -117,44 +117,4 @@ public class OrderController(
 
         return RedirectToAction("Index", "Order");
     }
-
-    [HttpGet]
-    public async Task<IActionResult> MakePayment(int orderId)
-    {
-        var order = await orderService.GetByIdAsync(orderId);
-        if (order != null) return PartialView("_MakePayment", order);
-        TempData["errorMessage"] = $"No se encontraron la orden {orderId}.";
-        return RedirectToAction("Index", "Order");
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> MakePayment(int orderId, PaymentMethods? payment)
-    {
-        if (!payment.HasValue)
-        {
-            TempData["errorMessage"] = "Error: Debe seleccionar un método de pago válido.";
-            return RedirectToAction("Index", "Order");
-        }
-
-        try
-        {
-
-            var user = HttpContext.Session.GetUser();
-
-            var order = await orderService.GetByIdAsync(orderId);
-            if (order == null) return NotFound("La orden especificada no existe.");
-
-            await orderService.MakePaymentAsync(order, user!.UserId, payment.Value);
-
-            TempData["message"] = $"Pago procesado exitosamente por medio de: {payment.Value}.";
-            return RedirectToAction("Index");
-
-        }
-        catch (Exception ex)
-        {
-            TempData["errorMessage"] = $"Ocurrió un error inesperado al procesar el pago: {ex.Message}";
-            return RedirectToAction("Index", "Order");
-        }
-        
-    }
 }

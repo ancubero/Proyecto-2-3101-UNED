@@ -1,3 +1,107 @@
+@using Proyecto_2_3101.Extensions
+@model Proyecto_2_3101.Models.ViewModels.OperationsDashboardViewModel
+
 @{
-    ViewBag.Title = "Creación de usuario"; 
+    ViewBag.Title = "Panel de Operaciones Diarias";
 }
+
+<div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-4">
+    <h2><i class="bi bi-speedometer2 text-dark"></i> @ViewBag.Title</h2>
+    <span class="badge bg-dark p-2 fs-6"><i class="bi bi-calendar-event"></i> Hoy: @DateTime.Now.ToString("dd/MM/yyyy")</span>
+</div>
+
+<!-- --- REAL-TIME KPI COUNTER BADGES BAR --- -->
+<div class="row g-3 mb-4">
+    <!-- Card 1: Total Volume -->
+    <div class="col-md-3">
+        <div class="card bg-dark text-white border-0 shadow-sm text-center p-3">
+            <h6 class="text-white-50 text-uppercase small font-weight-bold m-0">Órdenes Totales</h6>
+            <h1 class="display-4 fw-bold my-1">@Model.TotalOrdersToday</h1>
+            <small class="text-white-50">Vehículos ingresados hoy</small>
+        </div>
+    </div>
+    
+    <!-- Card 2: Pending Cars -->
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark border-0 shadow-sm text-center p-3">
+            <h6 class="text-dark-50 text-uppercase small font-weight-bold m-0">En Espera (Pending)</h6>
+            <h1 class="display-4 fw-bold my-1">@Model.PendingCount</h1>
+            <small class="text-dark-50">Por iniciar lavado</small>
+        </div>
+    </div>
+
+    <!-- Card 3: Processing Cars -->
+    <div class="col-md-3">
+        <div class="card bg-primary text-white border-0 shadow-sm text-center p-3">
+            <h6 class="text-white-50 text-uppercase small font-weight-bold m-0">Lavando (Processing)</h6>
+            <h1 class="display-4 fw-bold my-1">@Model.ProcessingCount</h1>
+            <small class="text-white-50">En bahía de servicio</small>
+        </div>
+    </div>
+
+    <!-- Card 4: Revenue Accumulator -->
+    <div class="col-md-3">
+        <div class="card bg-success text-white border-0 shadow-sm text-center p-3">
+            <h6 class="text-white-50 text-uppercase small font-weight-bold m-0">Caja Estimada Hoy</h6>
+            <h1 class="fs-2 fw-bold my-3">@Model.TotalRevenueToday.FormatColones()</h1>
+            <small class="text-white-50">Excluye pendientes</small>
+        </div>
+    </div>
+</div>
+
+<!-- --- LIVE VEHICLE TRACKING GRID TABLE --- -->
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-secondary text-white fw-bold py-3">
+        <i class="bi bi-activity"></i> Monitor en Vivo de Vehículos en el Lavado
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover table-striped align-middle m-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-4">Hora de Ingreso</th>
+                    <th>Placa / Vehículo</th>
+                    <th>Cliente</th>
+                    <th class="text-center">Estado Operacional</th>
+                    <th class="text-end pe-4">Monto de Orden</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.TodayOrdersList.Any())
+                {
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            <i class="bi bi-car-front fs-2 d-block mb-2"></i>
+                            No se han registrado vehículos en tránsito el día de hoy.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var order in Model.TodayOrdersList)
+                    {
+                        <tr>
+                            <td class="ps-4 font-monospace text-muted">
+                                @order.CreatedAt.LocalDateTime.ToString("hh:mm tt")
+                            </td>
+                            <td>
+                                <span class="fw-bold text-dark font-monospace border px-2 py-1 bg-white rounded shadow-sm">
+                                    @order.Vehicle?.PlateNumber
+                                </span>
+                                <span class="ms-2 text-muted small">@order.Vehicle?.Brand @order.Vehicle?.Model</span>
+                            </td>
+                            <td>@order.Client?.Fullname</td>
+                            <td class="text-center">
+                                <span class="badge @order.OrderStatus.ToBadgeColor() px-3 py-2 fs-6">
+                                    @Html.DisplayFor(m => order.OrderStatus)
+                                </span>
+                            </td>
+                            <td class="text-end pe-4 fw-bold text-dark">
+                                @order.TotalPrice.FormatColones()
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

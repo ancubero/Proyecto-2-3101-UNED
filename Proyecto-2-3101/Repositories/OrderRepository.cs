@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Proyecto_2_3101.Data;
 using Proyecto_2_3101.Models;
 using Proyecto_2_3101.Models.Enums;
+using Proyecto_2_3101.Models.ViewModels;
 
 namespace Proyecto_2_3101.Repositories;
 
@@ -84,7 +85,7 @@ public class OrderRepository(DataBaseContext context) : IOrderRepository
             .Include(v => v.Vehicle)
             .Include(cu => cu.CreatedByUser)
             .Include(uu => uu.UpdatedByUser)
-            .Where(o => o.CreatedAt >= startTime && o.CreatedAt <= endTime)
+            .Where(o => o.CreatedAt >= startTime && o.CreatedAt < endTime)
             .ToListAsync();
     }
 
@@ -115,5 +116,27 @@ public class OrderRepository(DataBaseContext context) : IOrderRepository
         return await query
             .OrderByDescending(o => o.CreatedAt)
             .ToListAsync();
+    }
+
+    public async Task<OrderStatusReportViewModel> GetOrderByStatusAsync()
+    {
+        var groupedOrders = await context.Orders
+            .GroupBy(o => o.OrderStatus)
+            .Select(g => new StatusCountItem()
+            {
+                Status = g.Key,
+                Count = g.Count(),
+                TotalRevenue = g.Sum(o => o.TotalPrice)
+            }).ToListAsync();
+
+        var report = new OrderStatusReportViewModel
+        {
+            StatusBreakdown =  groupedOrders,
+            TotalOrdersCount =  groupedOrders.Sum(o => o.Count),
+            GrandTotalPrice = groupedOrders.Sum(i => i.TotalRevenue)
+        };
+
+
+        return report;
     }
 }

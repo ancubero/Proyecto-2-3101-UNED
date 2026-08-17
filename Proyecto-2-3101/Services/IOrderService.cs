@@ -1,5 +1,6 @@
 using Proyecto_2_3101.Models;
 using Proyecto_2_3101.Models.Enums;
+using Proyecto_2_3101.Models.ViewModels;
 
 namespace Proyecto_2_3101.Services;
 
@@ -15,4 +16,6 @@ public interface IOrderService
     Task<IEnumerable<OrderModel>> GetFilteredOrdersAsync(DateTime? startDate, DateTime? endDate, OrderStatus? status);
     Task UpdateStatusAsync(OrderModel order, int userId);
     Task MakePaymentAsync(OrderModel order, int userId, PaymentMethods paymentMethod);
+    Task<OrderStatusReportViewModel>  GetOrderByStatusAsync();
+    Task<OperationsDashboardViewModel> GetDailyOperationsDashboardAsync();
 }
