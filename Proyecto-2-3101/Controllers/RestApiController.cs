@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Proyecto_2_3101.Extensions;
 using Proyecto_2_3101.Models.Enums;
 using Proyecto_2_3101.Services;
 
@@ -7,7 +8,8 @@ namespace Proyecto_2_3101.Controllers;
 [ApiController]
 [Route("/api/")]
 public class RestApiController(IJobTypeService jobTypeService,
-    IOrderService orderService) : ControllerBase
+    IOrderService orderService,
+    IPaymentService paymentService) : ControllerBase
 {
     [HttpGet("servicios")]
     public async Task<IActionResult> Index()
@@ -85,6 +87,82 @@ public class RestApiController(IJobTypeService jobTypeService,
         {
             return StatusCode(500, new { error = "Error interno del servidor", details = ex.Message });
         }
+    }
+
+    [HttpGet("ordenes")]
+    public async Task<IActionResult> OrdersByState([FromQuery] string estado)
+    {
+        if (string.IsNullOrWhiteSpace(estado))
+        {
+            return BadRequest(new { error = "Parámetro Requerido", message = "Debe proporcionar el parámetro 'estado' en la URL." });
+        }
+
+        var parsedStatus = OrderStatus.FromDisplayName(estado);
+
+        if (!parsedStatus.HasValue)
+        {
+            return BadRequest(new 
+            { 
+                error = "Estado Desconocido", 
+                message = $"El valor '{estado}' no coincide con ninguna etiqueta de visualización del sistema." 
+            });
+        }
+
+        try
+        {
+
+            var filteredOrders = await orderService.GetByStatusAsync(parsedStatus.Value);
+
+            if (!filteredOrders.Any())
+            {
+                return NotFound(new { message = $"No se encontraron órdenes activas con el estado '{estado}'." });
+            }
+            
+            return Ok(filteredOrders);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = "Error interno del servidor", details = ex.Message });
+        }
+    }
+
+    [HttpGet("reportes/ordenes-por-estado")]
+    public async Task<IActionResult> OrdersSummaryByStatus()
+    {
+        var orders = await orderService.GetOrderByStatusAsync();
+        return Ok(orders);
+    }
+
+    [HttpGet("reportes/ingresos")]
+    public async Task<IActionResult> GetRevenueReportAsync([FromQuery(Name = "desde")] DateTime? startDate, [FromQuery(Name = "hasta")] DateTime? endDate)
+    {
+
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new { 
+                error = "Formato de Fecha Inválido", 
+                message = "La fecha proporcionada no tiene un formato válido. Use el estándar YYYY-MM-DD." 
+            });
+        }
+        
+        if (!startDate.HasValue)
+        {
+            return BadRequest(new { 
+                error = "Falta Parámetro", 
+                message = "El campo 'desde' es requerido." 
+            });
+        }
+
+        if (!endDate.HasValue)
+        {
+            return BadRequest(new { 
+                error = "Falta Parámetro", 
+                message = "El campo 'hasta' es requerido." 
+            });
+        }
+        
+        var ingresos = await paymentService.GetRevenueReportAsync(startDate, endDate);
+        return Ok(ingresos);
         
     }
 }
