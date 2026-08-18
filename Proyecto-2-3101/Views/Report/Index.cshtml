@@ -3,7 +3,12 @@
 }
 
 <h2>@ViewBag.Title</h2>
-
-<a href="@Url.Action("OrdersByStatus", "Report")">Status</a>
-<a href="@Url.Action("OrdersByDate", "Report")">Resumen por dia</a>
-<a href="@Url.Action("JobPerformanceSummary", "Report")">Servicios solicitados</a>
+<div class="mt-5">
+    <a href="@Url.Action("OrdersByStatus", "Report")"><img src="images/reporte-estado.png" alt="Reporte por Estado" style="width: 100%; height: auto"/></a>
+</div>
+<div class="mt-5">
+    <a href="@Url.Action("OrdersByDate", "Report")"><img src="images/reporte-resumen.png" alt="Resumen del día" style="width: 100%; height: auto"/></a>
+</div>
+<div class="mt-5">
+    <a href="@Url.Action("JobPerformanceSummary", "Report")"><img src="images/reporte-servicios.png" alt="Servicios solicitados" style="width: 100%; height: auto"/></a>
+</div>
